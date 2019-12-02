@@ -41,7 +41,7 @@ for p in points:
                 count[line] = 0
             count[line] += 1
 
-print("\nEricho finds %d rectangles in %d μs" % (answer, time.time()*10e6-t))
+print("\nErricho's algorithm finds %d rectangles in %d μs" % (answer, time.time()*10e6-t))
 
 
 # My solution
