@@ -46,12 +46,12 @@ t = time.time() * 1e6
 rects = []
 for p1 in points:
     for p2 in points:
-        if p2[0] > p1[0] and p2[1] >= p1[1]:
+        if p2[0] > p1[0] and p2[1] <= p1[1]:
             for p4 in points:
                 if p4 != p1 and p4 != p2 and orth(p1, p2, p4) and CW(p1,p2,p4):
-                    for p3 in points:
-                        if p3 != p1 and p3 != p2 and p3 != p4 and orth(p3, p2, p4) and orth(p2, p1, p3):
-                            rects.append((p1, p2, p3, p4))
+                    p3 = (p4[0] - p1[0] + p2[0], p4[1] - p1[1] + p2[1])
+                    if p3 in points:
+                        rects.append((p1, p2, p3, p4))
 
 t = time.time()*1e6-t
 
