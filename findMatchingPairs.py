@@ -10,11 +10,10 @@ def HasPair(list,goal):
         if sum == goal:
             # print("Success : %d + %d = %d" % (list[a], list[b], goal))
             return True
+        elif sum > goal:
+            b -= 1
         else:
-            if sum > goal:
-                b -= 1
-            else:
-                a += 1
+            a += 1
     return False
 
 
