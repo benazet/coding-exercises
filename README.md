@@ -1,4 +1,4 @@
-# coding interview exercises
+# coding exercises
  
 This is just a simple repo to share my exercises
 
