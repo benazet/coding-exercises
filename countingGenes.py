@@ -22,4 +22,4 @@ for n in range(1, 10):
         if mum == 2 and dad == 2:
             all += 1
 
-    print('{0:^10}{1:>6}{2:>11}{3:>8.1%}'.format(n,  count, all, all/count))
+    print('{:^10}{:>6}{:>11}{:>8.1%}'.format(n,  count, all, all/count))
