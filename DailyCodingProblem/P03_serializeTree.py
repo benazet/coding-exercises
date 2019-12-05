@@ -32,7 +32,5 @@ def deserialize(text):
 
 # The following test should pass:
 node = Node('root', Node('left', Node('left.left')), Node('right'))
-print(serialize(node))
 assert deserialize(serialize(node)).left.left.val == 'left.left'
-print (deserialize(serialize(node)).left.left.val )
 
