@@ -13,7 +13,7 @@ def schedule(f,n):
     t = time.time()
     while time.time() - t < n:
         #waiting
-        print("Waiting")
+        a=1
     f()
 
-schedule(f)
+schedule(f,1)
