@@ -10,10 +10,29 @@ import math
 import timeit
 
 
-def power(x, y):
+def square_and_multiply(x, y):
     if y == 1:
         return x
     elif (y % 2) == 0:
-        return power(x*x, y/2)
+        return square_and_multiply(x*x, y/2)
     else:
-        return x*power(x*x, y//2)
+        return x * square_and_multiply(x*x, y//2)
+
+
+def naive_repeated_multiplication(x, y):
+    result = 1
+    for _ in range(y):
+        result *= x
+    return result
+
+
+def sm():
+    return square_and_multiply(2, 257)
+
+
+def naive():
+    return naive_repeated_multiplication(2, 257)
+
+
+print(timeit.timeit(sm))
+print(timeit.timeit(naive))
