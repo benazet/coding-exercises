@@ -60,25 +60,6 @@ def createOrchard(h, w, n=-1, r=-1, c=-1):
 
 
 def printOrchard(cheat=False):
-
-    symbol = " 12345678▉"
-    val = [[""] + [symbol[a] for a in row] for row in _apples]
-    for r in range(height):
-        for c in range(width):
-            if cheat:
-                if tree[r][c]:
-                    val[r][c+1] = ""
-            if _flag[r][c]:
-                if tree[r][c] or not cheat:
-                    val[r][c+1] = "⚑"
-                else:
-                    val[r][c+1] = "⚐"
-
-    for r in range(height):
-        print("".join(c for c in val[r]))
-
-
-def fancyOrchard(cheat=False):
     global seed
     global number
     printCells(0,height,0,width,cheat)
@@ -87,7 +68,15 @@ def fancyOrchard(cheat=False):
     print(f" / 🍏  {flags} flags",end = '')
     print(f" / seed = {seed}")
     print()
-
+    print(f"Techniques used :")
+    print(f"   {'Clearing':<12}{ClearingTechnique:>3}")
+    print(f"   {'Lumberjack':<12}{LumberjackTechnique:>3}")
+    print(f"   {'Forrester':<12}{ForresterTechnique:>3}")
+    print(f"   {'Pairs':<12}{PairsTechnique:>3}")
+    print(f"   {'Triplets':<12}{TripletsTechnique:>3}")
+    print(f"   {'Dragons':<12}{DragonsTechnique:>3}")
+    print(f"   {'Brute Force':<12}{0:>3}")
+    print()
 def printGroup(group,cheat=False):
     
     neighbours = [n for c in group for n in neighbourCells(c) ]
@@ -133,16 +122,6 @@ def printCells(rMin,rMax,cMin,cMax,cheat):
         print(f"{letter(r):^3}") 
         print("   " + [line2, line3][r==height-1])
     print("    " + " ".join(f"{c+1:^3}" for c in range(cMin,cMax)))
-
-def printStats():
-    print(f"Techniques used :")
-    print(f"   {'Clearing':<12}{ClearingTechnique:>3}")
-    print(f"   {'Lumberjack':<12}{LumberjackTechnique:>3}")
-    print(f"   {'Forrester':<12}{ForresterTechnique:>3}")
-    print(f"   {'Pairs':<12}{PairsTechnique:>3}")
-    print(f"   {'Triplets':<12}{TripletsTechnique:>3}")
-    print(f"   {'Dragons':<12}{DragonsTechnique:>3}")
-    print(f"   {'Brute Force':<12}{0:>3}")
     print()
 
 def position(cell):
@@ -340,55 +319,43 @@ def Pairs(A):
             
             flaggedCells = []
             clearedCells = []
-            postponed = []
                 
             if (aA - fA) - (aB - fB) == (uA - fA) - (uI - fI):
                 for c in x:
-                    if neighbourChecked(c):
-                        flaggedCells.append(c)
-                        mark(c)
-                    else:
-                        postponed.append(c)
+                    flaggedCells.append(c)
 
                 for c in x2:
-                    if neighbourChecked(c):
-                        clearedCells.append(c)
-                        cutTree(c)
-                    else:
-                        postponed.append(c)
+                    clearedCells.append(c)
 
             if (aB - fB) - (aA - fA) == (uB - fB) - (uI - fI):
                 for c in x2:
-                    if  neighbourChecked(c):
-                        flaggedCells.append(c)
-                        mark(c)
-                    else:
-                        postponed.append(c)
+                    flaggedCells.append(c)
 
                 for c in x:
-                    if neighbourChecked(c):
-                        clearedCells.append(c)
-                        cutTree(c)
-                    else:
-                        postponed.append(c)
+                    clearedCells.append(c)
 
             if len(flaggedCells) > 0 or len(clearedCells) > 0:
                 PairsTechnique += 1
+                printGroup([A,B])
+                
+                for c in flaggedCells:
+                    mark(c)
+                for c in clearedCells:
+                    cutTree(c)
                 
                 if verbose:
-                    printGroup([A,B])
-                    print(f"PAIR\t{position(A)} and {position(B)} share {uI-fI} unmarked neighbours {' '.join(position(c) for c in xI)}")
+                    print(f"PAIRS")
+                    print(f"  {position(A)} and {position(B)} share {uI-fI} unmarked neighbours {' '.join(position(c) for c in xI)}")
                     if len(x) >0 :
-                        print(f"    \t{position(A)} has {aA-fA} apple trees remaining in the shared neighbours or {' '.join(position(c) for c in x)}")
+                        print(f"  {position(A)} has {aA-fA} apple trees remaining in the shared neighbours or {' '.join(position(c) for c in x)}")
                     else:
-                        print(f"    \t{position(A)} has {aA-fA} apple trees remaining in the shared neighbours")
+                        print(f"  {position(A)} has {aA-fA} apple trees remaining in the shared neighbours")
                     if len(x2) >0 :
-                        print(f"    \t{position(B)} has {aB-fB} apple trees remaining in the shared neighbours or {' '.join(position(c) for c in x2)}")
+                        print(f"  {position(B)} has {aB-fB} apple trees remaining in the shared neighbours or {' '.join(position(c) for c in x2)}")
                     else:
-                        print(f"    \t{position(B)} has {aB-fB} apple trees remaining in the shared neighbours")
-                    if len(flaggedCells)>0 : print(f"\tMarking {' '.join(position(c) for c in flaggedCells)}")
-                    if len(clearedCells)>0 : print(f"\tCutting off {' '.join(position(c) for c in clearedCells)}")
-                    if len(postponed) > 0  : print(f"\t{' '.join(position(c) for c in postponed)} ignored for the moment as simpler techniques may work")
+                        print(f"  {position(B)} has {aB-fB} apple trees remaining in the shared neighbours")
+                    if len(flaggedCells)>0 : print(f"> Marking {' '.join(position(c) for c in flaggedCells)}")
+                    if len(clearedCells)>0 : print(f"> Cutting off {' '.join(position(c) for c in clearedCells)}")
                     print()
 
                 return True
@@ -412,7 +379,7 @@ def maxApples(group, cell):
     a = apples(cell)
     f = countFlag(n)
     
-    return max(len(group),a - f)
+    return min(len(group),a - f)
   
 
 def Triplets(A):
@@ -442,10 +409,11 @@ def Triplets(A):
                                 for c in xB:
                                     cutTree(c)
                                 printGroup([A,B,C])
-                                print(f"TRIPLET\t{position(B)} shares neighbours with {position(A)} and {position(C)}")
-                                print(f"\t{position(A)} has minimum {minA} in the shared neighbours {' '.join(position(c) for c in nAiB)}")
-                                print(f"\t{position(C)} has minimum {minC} in the shared neighbours {' '.join(position(c) for c in nBiC)}")
-                                print(f"\tCutting off {' '.join(position(c) for c in xB)}")
+                                print(f"TRIPLETS")
+                                print(f"  {position(B)} shares neighbours with {position(A)} and {position(C)}")
+                                print(f"   - {position(A)} has minimum {minA} in the shared neighbours {' '.join(position(c) for c in nAiB)}")
+                                print(f"   - {position(C)} has minimum {minC} in the shared neighbours {' '.join(position(c) for c in nBiC)}")
+                                print(f"> Cutting off {' '.join(position(c) for c in xB)}")
                                 print()
                                 return True
                             
@@ -456,10 +424,11 @@ def Triplets(A):
                                 for c in xB:
                                     mark(c)
                                 printGroup([A,B,C])
-                                print(f"TRIPLET\t{position(B)} shares neighbours with {position(A)} and {position(C)}")
-                                print(f"\t{position(A)} has maximum {maxA} in the neighbours he shares with {position(B)}: {' '.join(position(c) for c in nAiB)}")
-                                print(f"\t{position(C)} has maximum {maxC} in the neighbours he shares with {position(B)}: {' '.join(position(c) for c in nBiC)}")
-                                print(f"\tMarking {' '.join(position(c) for c in xB)}")
+                                print(f"TRIPLETS")
+                                print(f"  {position(B)} shares neighbours with {position(A)} and {position(C)}")
+                                print(f"   - {position(A)} has maximum {maxA} in the neighbours he shares with {position(B)}: {' '.join(position(c) for c in nAiB)}")
+                                print(f"   - {position(C)} has maximum {maxC} in the neighbours he shares with {position(B)}: {' '.join(position(c) for c in nBiC)}")
+                                print(f"> Marking {' '.join(position(c) for c in xB)}")
                                 print()
                                 return True
                                 
@@ -474,7 +443,11 @@ def minDragons():
     # We call 'dragons' the groups of intersecting group of uncut trees adjacent to a cleared cell
     # A. We determinate the dragons
     # B. We count min number of apple trees in each dragon, and add them
-    # C. if this sum equals the number of remaining apple trees, then every cell that is not in a dragon can be cleared
+    #    If this sum equals the number of remaining apple trees, then
+    #    every cell that is not in a dragon can be cleared
+    # C. We count the max number of apple trees in each dragon, and add them
+    #    If this number + the number of other remaining trees equals the 
+    #    number of remaining apple trees, then all other remaining trees are apple trees
 
     # The term 'dragon' comes from the game of Go
 
@@ -575,13 +548,14 @@ def minDragons():
         if len(cutTrees)>0 :
             print()
             printGroup([c for dragon in dragons for group in dragon for c in group])
-            print(f"🐲\t{number - flags} apple trees remaining, and minimum {totalMin} in the following groups :")
+            print(f"DRAGONS")
+            print(f"  {number - flags} total apple trees remaining, and minimum {totalMin} in the following groups :")
             index = 0
             for dragon in dragons:
                 cells = sorted(set([cell for group in dragon for cell in group]))
-                print(f"\t - minimum {minAppleTrees[index]} in group {' '.join(position(cell) for cell in cells)}")
+                print(f"   - minimum {minAppleTrees[index]} in group {' '.join(position(cell) for cell in cells)}")
                 index +=1
-            print(f"\tCutting of all remaining trees : {' '.join(position(cell) for cell in cutTrees)}")
+            print(f"> Cutting of all other remaining trees : {' '.join(position(cell) for cell in cutTrees)}")
             print()
             
             for cell in cutTrees:
@@ -600,8 +574,8 @@ def collectApples(s=0):
     # Intermediate 16 * 16 * 40
     # Advanced 16 * 31 * 99
     height = 16
-    width  = 16
-    number = 40
+    width  = 31
+    number = 99
 
     global seed
     seed = s
@@ -619,6 +593,8 @@ def collectApples(s=0):
     print("We need to make space for apple trees 🎄 , by cutting other trees 🌲 .")
     print("Every apple tree drops an apple 🍏  on each of the eight surrounding cells.")
     print("Mark the apple trees so that the lumberjack won't cut them")
+    print()
+    print(f"The first tested cell ({position((r,c))})is guaranteed to be a clearing")
     print()
     cutTree((r, c))
     stack.append((r, c))
@@ -646,8 +622,8 @@ def collectApples(s=0):
                 print(f"\tNo remaining apple trees. Cutting of remaining unmarked trees : {'-'.join(position(cell) for cell in cutTrees)}")
                         
 
-    fancyOrchard()
-    printStats()
+    printOrchard()
+    
 
 verbose = True
-collectApples(323)
+collectApples()
