@@ -19,9 +19,10 @@ seed      = 0
 ClearingTechnique   = 1
 LumberjackTechnique = 0
 ForresterTechnique  = 0
-PairsTechnique      = 0
+TwinsTechnique      = 0
 TripletsTechnique   = 0
 DragonsTechnique    = 0
+BruteForceTechnique = 0
 
 def createOrchard(h, w, n=-1, r=-1, c=-1):
     global width
@@ -72,10 +73,10 @@ def printOrchard(cheat=False):
     print(f"   {'Clearing':<12}{ClearingTechnique:>3}")
     print(f"   {'Lumberjack':<12}{LumberjackTechnique:>3}")
     print(f"   {'Forrester':<12}{ForresterTechnique:>3}")
-    print(f"   {'Pairs':<12}{PairsTechnique:>3}")
+    print(f"   {'Twins':<12}{TwinsTechnique:>3}")
     print(f"   {'Triplets':<12}{TripletsTechnique:>3}")
     print(f"   {'Dragons':<12}{DragonsTechnique:>3}")
-    print(f"   {'Brute Force':<12}{0:>3}")
+    print(f"   {'Brute Force':<12}{BruteForceTechnique:>3}")
     print()
 def printGroup(group,cheat=False):
     
@@ -123,6 +124,9 @@ def printCells(rMin,rMax,cMin,cMax,cheat):
         print("   " + [line2, line3][r==height-1])
     print("    " + " ".join(f"{c+1:^3}" for c in range(cMin,cMax)))
     print()
+
+def positions(group):
+    return ' '.join(position(cell) for cell in group)
 
 def position(cell):
     r, c = cell
@@ -244,7 +248,7 @@ def cutTree(cell):
             checkCell(cell)
             return True
 
-def mark(cell):
+def markTree(cell):
     global flags
     r, c = cell
     _flag[r][c] = True
@@ -269,7 +273,7 @@ def beginnerTechniques(cell):
         result = cutNeighbours(cell)
         if result != []:
             if verbose:
-                print(f"{position(cell)}\tCLEARING : no apple, cutting off " + " ".join(position(c) for c in result))
+                print(f"{position(cell)}\tCLEARING : no apple, cutting off {positions(result)}")
             ClearingTechnique += 1
             return 
 
@@ -277,7 +281,7 @@ def beginnerTechniques(cell):
         result = cutNeighbours(cell)
         if result != []:
             if verbose:
-                print(f"{position(cell)}\tLUMBERJACK : all apple trees marked, cutting off " + " ".join(position(c) for c in result))
+                print(f"{position(cell)}\tLUMBERJACK : all apple trees marked, cutting off {positions(result)}")
             LumberjackTechnique +=1
             return 
 
@@ -288,7 +292,7 @@ def beginnerTechniques(cell):
                     print(
                         f"{position(cell)}\tFORRESTER : as many apples as trees, marking {position(c)}")
                 ForresterTechnique += 1
-                mark(c)
+                markTree(c)
                 return
 
 
@@ -313,8 +317,8 @@ def maxApples(group, cell):
     
     return min(len(group),a - f)
   
-def Pairs(A):
-    global PairsTechnique
+def Twins(A):
+    global TwinsTechnique
     listA = borders()
     for A in listA:
         nA = neighbourCells(A)
@@ -330,31 +334,30 @@ def Pairs(A):
                 minB = minApples(nAiB,B)
                 maxB = maxApples(nAiB,B)
                 xA = [c for c in unA if not c in nAiB]
-                xB = [c for c in unB if not c in nAiB]
                 if len(xA) > 0 :
                     if a - f - minB == 0:
-                        PairsTechnique +=1
+                        TwinsTechnique +=1
                         printGroup([A,B])
-                        print(f"PAIRS")
-                        print(f"  {position(A)} and {position(B)} share {len(nAiB)} neighbours {' '.join(position(c) for c in nAiB)}")
+                        print(f"LUMBERJACK TWINS")
+                        print(f"  {position(A)} and {position(B)} share {len(nAiB)} neighbours {positions(nAiB)}")
                         print(f"  {position(B)} has minimum {minB} apple trees in the shared neighbours")
-                        print(f"  {position(A)} has no remaining apple trees in {' '.join(position(c) for c in xA)}")
-                        if len(xA):print(f"> Cutting off {' '.join(position(c) for c in xA)}")
+                        print(f"  {position(A)} has no remaining apple trees in {positions(xA)}")
+                        if len(xA):print(f"> Cutting off {positions(xA)}")
                         print()
                         for c in xA: cutTree(c)
-                        return True
+                        
                 
                     if a - f - maxB == len(xA):
-                        PairsTechnique +=1
+                        TwinsTechnique +=1
                         printGroup([A,B])
-                        print(f"PAIRS")
-                        print(f"  {position(A)} and {position(B)} share {len(nAiB)} neighbours {' '.join(position(c) for c in nAiB)}")
+                        print(f"FORRESTER TWINS")
+                        print(f"  {position(A)} and {position(B)} share {len(nAiB)} neighbours {positions(nAiB)}")
                         print(f"  {position(B)} has maximum {maxB} apple trees in the shared neighbours")
-                        print(f"  {position(A)} has {a-f-maxB} remaining apple trees in {len(xA)} trees {' '.join(position(c) for c in xA)}")
-                        if len(xA):print(f"> Marking {' '.join(position(c) for c in xA)}")
+                        print(f"  {position(A)} has {a-f-maxB} remaining apple trees in {len(xA)} trees {positions(xA)}")
+                        if len(xA):print(f"> Marking {positions(xA)}")
                         print()
-                        for c in xA: mark(c)
-                        return True
+                        for c in xA: markTree(c)
+                        
             
 
     
@@ -383,11 +386,11 @@ def Triplets(A):
                             if a - f - minA - minC == 0 :
                                 TripletsTechnique +=1
                                 printGroup([A,B,C])
-                                print(f"TRIPLETS")
+                                print(f"LUMBERJACK TRIPLETS")
                                 print(f"  {position(B)} shares {len(nAiB)} neighbours with {position(A)} and {len(nBiC)} with {position(C)}")
-                                print(f"   - {position(A)} has minimum {minA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}")
-                                print(f"   - {position(C)} has minimum {minC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}")
-                                print(f"> Cutting off {' '.join(position(c) for c in xB)}")
+                                print(f"   - {position(A)} has minimum {minA} apple trees in the shared neighbours {positions(nAiB)}")
+                                print(f"   - {position(C)} has minimum {minC} apple trees in the shared neighbours {positions(nBiC)}")
+                                print(f"> Cutting off {positions(xB)}")
                                 print()
                                 for c in xB: cutTree(c)
                                 
@@ -397,23 +400,20 @@ def Triplets(A):
                             if a - f - maxA - maxC == len(xB):
                                 TripletsTechnique +=1
                                 printGroup([A,B,C])
-                                print(f"TRIPLETS")
+                                print(f"FORRESTER TRIPLETS")
                                 print(f"  {position(B)} shares neighbours with {position(A)} and {position(C)}")
-                                print(f"   - {position(A)} has maximum {maxA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}")
-                                print(f"   - {position(C)} has maximum {maxC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}")
-                                print(f"> Marking {' '.join(position(c) for c in xB)}")
+                                print(f"   - {position(A)} has maximum {maxA} apple trees in the shared neighbours {positions(nAiB)}")
+                                print(f"   - {position(C)} has maximum {maxC} apple trees in the shared neighbours {positions(nBiC)}")
+                                print(f"> Marking {positions(xB)}")
                                 print()
-                                for c in xB: mark(c)
+                                for c in xB: markTree(c)
                                 
                                 
-                
-
-
-    return False
+            
     
 
 
-def minDragons():
+def getDragons():
     # We call 'dragons' the groups of intersecting group of uncut trees adjacent to a cleared cell
     # A. We determinate the dragons
     # B. We count min number of apple trees in each dragon, and add them
@@ -465,8 +465,11 @@ def minDragons():
                 dragon.append(groups[j])
         if len(dragon) > 0:
             dragons.append(dragon)
+    return dragons, groups, applesInGroup, nGroups, inDragon
 
-    # B POPULATE THE DRAGONS
+def Dragons():
+    dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
+    # B COUNT THE MIN NUMBER OF APPLE TREES
     # To determine the minimum number of apple trees, populate first the cells that intersect the most groups
     
     hypFlag = [[False for _ in range(width)] for _ in range(height)]
@@ -477,7 +480,6 @@ def minDragons():
     index = 0
     for dragon in dragons:
         if len(dragon) == 1:
-            # get a cell
             minAppleTrees[index] = applesInGroup[groups.index(dragon[0])]
         else:
             for group in dragon:
@@ -522,24 +524,256 @@ def minDragons():
         if len(cutTrees)>0 :
             print()
             printGroup([c for dragon in dragons for group in dragon for c in group])
-            print(f"DRAGONS")
+            print(f"LUMBERJACK DRAGONS")
             print(f"  {number - flags} apple trees remaining in the orchard, and minimum {totalMin} in the following groups :")
             index = 0
             for dragon in dragons:
                 cells = sorted(set([cell for group in dragon for cell in group]))
-                print(f"   - minimum {minAppleTrees[index]} in group {' '.join(position(cell) for cell in cells)}")
+                print(f"   - minimum {minAppleTrees[index]} in group {positions(cells)}")
                 index +=1
-            print(f"> Cutting of all other remaining trees : {' '.join(position(cell) for cell in cutTrees)}")
+            print(f"> Cutting off all other remaining trees : {positions(cutTrees)}")
             print()
             
             for cell in cutTrees:
                 cutTree(cell)
             global DragonsTechnique
             DragonsTechnique += 1
-            return True
+   
         
-    return False
+        
+        
+    # B COUNT THE MAX NUMBER OF APPLE TREES
+    # To determine the minimum number of apple trees, populate first the cells that intersect the most groups
+    
+    hypFlag  = [[False for _ in range(width)] for _ in range(height)]
+    hypClear = [[False for _ in range(width)] for _ in range(height)]
 
+    maxAppleTrees = [0 for _ in range(len(dragons))]
+    totalMax = 0
+    index = 0
+    for dragon in dragons:
+        if len(dragon) == 1:
+            maxAppleTrees[index] = applesInGroup[groups.index(dragon[0])]
+        else:
+            for group in dragon:
+                n = applesInGroup[groups.index(group)]
+                for r, c in group:
+                    if hypFlag[r][c]:
+                        n -= 1
+
+                while n > 0:
+                    min = 8
+                    for r, c in group:
+                        if nGroups[r][c] < min and not hypFlag[r][c] and not hypClear[r][c]:
+                            min = nGroups[r][c]
+                            bestr, bestc = r, c
+                    hypFlag[bestr][bestc] = True
+                    maxAppleTrees[index] += 1
+                    n -= 1
+
+                for r, c in group:
+                    if not hypFlag[r][c] and not hypClear[r][c]:
+                        hypClear[r][c] = True
+
+        totalMax += maxAppleTrees[index]
+        index+=1
+    
+    # Compare
+    others = []
+    for r in range(height):
+        for c in range(width):
+            cell = (r,c)
+            if not clear(cell) and not flag(cell) and not inDragon[r][c] :
+                others.append(cell)
+
+    if number - flags - totalMax == len(others):
+        # Flag all cells not in a dragon   
+        if len(others)>0 :
+            print()
+            printGroup([c for dragon in dragons for group in dragon for c in group])
+            print(f"FORRESTER DRAGONS")
+            print(f"  {number - flags} apple trees remaining in the orchard, and maximum {totalMax} in the following groups :")
+            index = 0
+            for dragon in dragons:
+                cells = sorted(set([cell for group in dragon for cell in group]))
+                print(f"   - maximum {maxAppleTrees[index]} in group {positions(cells)}")
+                index +=1
+            if len(others) == 1:
+                print(f"> Marking the other remaining tree : {positions(others)}")
+            else:
+                print(f"> Marking the {len(others)} other remaining trees : {positions(others)}")
+            print()
+            
+            for cell in others:
+                markTree(cell)
+            DragonsTechnique += 1
+       
+
+combinations = []
+cellIndex = []
+
+def DragonsBruteForce():
+    dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
+    global combinations
+    global cellIndex
+    totalMin = 0
+    totalMax = 0
+    minApples = [0 for _ in range(len(dragons))]
+    maxApples = [0 for _ in range(len(dragons))]
+    totalMinCells = []
+    totalMaxCells = []
+    for index,dragon in enumerate(dragons):
+        if len(dragon) == 1:
+            minApples[index] = applesInGroup[groups.index(dragon[0])]
+            maxApples[index] = applesInGroup[groups.index(dragon[0])]
+            minCells = []
+            maxCells = []
+        else:
+            cellIndex = sorted(set([cell for group in dragon for cell in group]))
+            combFlag = [False for _ in range(len(cellIndex))]
+            combClear = [False for _ in range(len(cellIndex))]
+            combinations = []
+            applesInDragon = [applesInGroup[groups.index(group)] for group in dragon]
+            recurseFindCombinations(dragon,applesInDragon, combFlag, combClear )
+            
+            l = len(cellIndex)
+            maxApples[index] = 0
+            minApples[index] = l
+            xor = [0 for _ in range(l)]
+            for combination in combinations:
+                n = 0
+                for i in range(l):
+                    if combination[i]:
+                        n += 1
+                        xor[i] += 1
+                
+                if n == maxApples[index]:
+                    maxCells = []
+                if n > maxApples[index]:
+                    maxApples[index] = n
+                    maxCells = []
+                    for cell,b in zip(cellIndex,combination):
+                        if b:
+                            maxCells.append(cell)
+            
+                if n == minApples[index]:
+                    minCells = []
+                elif n < minApples[index]:
+                    minApples[index] = n
+                    minCells = []
+                    for cell,b in zip(cellIndex,combination):
+                        if b:
+                            minCells.append(cell)
+
+            for x,b,cell in zip(xor,combinations[0],cellIndex):
+                if x == l:
+                    if b:
+                        print(f"Brute Force Dragon says to mark {position(cell)}")
+                    else:
+                        print(f"Brute Force Dragon says to cut {position(cell)}")
+                        
+        totalMin += minApples[index]
+        totalMax += maxApples[index]
+        totalMaxCells += maxCells
+        totalMinCells += minCells
+    
+        
+    others = []
+    for r in range(height):
+        for c in range(width):
+            cell = (r,c)
+            if not clear(cell) and not flag(cell) and not inDragon[r][c] :
+                others.append(cell)
+                
+    global BruteForceTechnique
+    global number
+    global flags
+    if totalMin == number - flags:
+        if totalMinCells != []:
+            print()
+            printGroup([c for dragon in dragons for group in dragon for c in group])
+            print(f"BRUTEFORCE DRAGONS")
+            print(f"  Every combination has been tested in the following groups :")
+            for index,dragon in enumerate(dragons):
+                cells = sorted(set([cell for group in dragon for cell in group]))
+                m = minApples[index]
+                M = maxApples[index]
+                if m == M:
+                    print(f"   - Dragon {positions(cells)} has {m} apple trees")
+                else:
+                    print(f"   - Dragon {positions(cells)} has {m} to {M} apple trees")
+            print(f"  There is only one combination that uses the minimum possible number of apple trees, ie {totalMin}")
+            print(f"  There are {number - flags} remaining apple trees")
+            print(f"> Marking {positions(totalMinCells)}")
+            print()
+       
+            for cell in totalMinCells:
+                markTree(cell)
+            BruteForceTechnique += 1
+       
+        
+          
+    if number - flags - totalMax == len(others):
+        if totalMaxCells != []:
+            print()
+            printGroup([c for dragon in dragons for group in dragon for c in group])
+            print(f"BRUTEFORCE DRAGONS")
+            print(f"  Every combination has been tested in the following groups :")
+            for index,dragon in enumerate(dragons):
+                cells = sorted(set([cell for group in dragon for cell in group]))
+                m = minApples[index]
+                M = maxApples[index]
+                if m == M:
+                    print(f"   - Dragon {positions(cells)} has {m} apple trees")
+                else:
+                    print(f"   - Dragon {positions(cells)} has {m} to {M} apple trees")
+            print(f"  There is only one combination that uses the maximum possible number of apple trees, ie {totalMax}")
+            print(f"  There are {len(others)} other unmarked trees, and {number - flags} remaining apple trees")
+            print(f"> Marking {positions(totalMaxCells)}")
+            print()
+            
+            for cell in totalMaxCells:
+                markTree(cell)
+            BruteForceTechnique += 1
+            
+def recurseFindCombinations(dragon, applesInDragon, combFlag, combClear):
+    if len(dragon) == 0:
+        combinations.append(combFlag)
+        return
+    else:
+        group = dragon[0]
+        tail  = dragon[1:]
+        n = applesInDragon[0]
+        t = applesInDragon[1:]
+        
+        for cell in group:
+            if combFlag[cellIndex.index(cell)]:
+                n -= 1
+                
+                
+        if n < 0:
+            return
+        elif n == 0:
+            newCombClear = [b for b in combClear]
+            for c in group:
+                newCombClear[cellIndex.index(c)] = True
+            recurseFindCombinations(tail,t,combFlag,newCombClear)    
+        else:
+            for cell in group:
+                index = cellIndex.index(cell)
+                if not combClear[index] :
+                    newCombFlag = [b for b in combFlag]
+                    newCombFlag[index] = True
+                    newCombClear = [b for b in combClear]
+                    for c in group:
+                        newCombClear[cellIndex.index(c)] = True
+                    
+                    if n == 1:
+                        recurseFindCombinations(tail,t,newCombFlag,newCombClear)
+                    else:
+                        applesInDragon[0] -=1
+                        recurseFindCombinations(dragon,applesInDragon,newCombFlag,combClear)
+            
     
 
 
@@ -554,7 +788,7 @@ def collectApples(s=0):
     global seed
     seed = s
     if seed == 0:
-        seed = random.randrange(1000)
+        seed = random.randrange(10000)
     print(f"Seed = {seed}")
     random.seed(seed)
 
@@ -569,20 +803,24 @@ def collectApples(s=0):
     print(f"Every apple tree drops an apple on each of the eight surrounding cells.")
     print(f"He will mark the apple trees with 🍏")
     print()
-    print(f"The first tested cell ({position((r,c))})is guaranteed to be a clearing")
+    print(f"The first tested cell ({position((r,c))}) is guaranteed to be a clearing")
     print()
     cutTree((r, c))
     stack.append((r, c))
 
     while len(stack) > 0:
         cell = stack.pop(0)
-        if beginnerTechniques(cell) : continue
+        beginnerTechniques(cell) 
         if len(stack) == 0 and number > flags:
-            if Pairs(cell) : continue
-            if Triplets(cell) : continue
-            if minDragons(): continue
+            Twins(cell) 
+        if len(stack) == 0 and number > flags:
+            Triplets(cell)
+        if len(stack) == 0 and number > flags:
+            Dragons()
+        if len(stack) == 0 and number > flags:
+            DragonsBruteForce()
                 
-
+        # i discarded the return True -> continue syntax used at first because it doesn't work with the dragons techniques that can change the board without changing the stack
 
     if number == flags:
         if cleared < width * height - number:
@@ -594,11 +832,11 @@ def collectApples(s=0):
                         cutTree(cell)
                         cutTrees.append(cell)
             if verbose :
-                print(f"\tNo remaining apple trees. Cutting of remaining unmarked trees : {'-'.join(position(cell) for cell in cutTrees)}")
+                print(f"\tNo remaining apple trees. Cutting of remaining unmarked trees {positions(cutTrees)}")
                         
 
     printOrchard()
     
 
 verbose = True
-collectApples()
+collectApples(4435)
