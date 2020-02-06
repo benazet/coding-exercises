@@ -25,6 +25,7 @@ ForresterTechnique  = 0
 TwinsTechnique      = 0
 TripletsTechnique   = 0
 DragonsTechnique    = 0
+BruteDragonsTechnique    = 0
 
 def createOrchard(h, w, n=-1, r=-1, c=-1):
     global width
@@ -73,13 +74,13 @@ def printOrchard(cheat=False):
     print(f"   seed = {seed}")
     print()
     print(f"Techniques used :")
-    print(f"   {'Clearing':<12}{ClearingTechnique:>3}")
-    print(f"   {'Lumberjack':<12}{LumberjackTechnique:>3}")
-    print(f"   {'Forrester':<12}{ForresterTechnique:>3}")
-    print(f"   {'Twins':<12}{TwinsTechnique:>3}")
-    print(f"   {'Triplets':<12}{TripletsTechnique:>3}")
-    print(f"   {'Dragons':<12}{DragonsTechnique:>3}")
-    print(f"   {'Brute Force':<12}{0:>3}")
+    print(f"   {'Clearing':<15}{ClearingTechnique:>3}")
+    print(f"   {'Lumberjack':<15}{LumberjackTechnique:>3}")
+    print(f"   {'Forrester':<15}{ForresterTechnique:>3}")
+    print(f"   {'Twins':<15}{TwinsTechnique:>3}")
+    print(f"   {'Triplets':<15}{TripletsTechnique:>3}")
+    print(f"   {'Dragons':<15}{DragonsTechnique:>3}")
+    print(f"   {'Brute Dragons':<15}{BruteDragonsTechnique:>3}")
     print()
 def printGroup(group,cheat=False):
     
@@ -619,6 +620,7 @@ def Dragons():
 
 
 def BruteDragons():
+    global BruteDragonsTechnique
     dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
     
     minApples = 0
@@ -630,7 +632,6 @@ def BruteDragons():
     dragonMinCells  = [[]for _ in range(len(dragons))]
     dragonMaxCells  = [[]for _ in range(len(dragons))]
     
-    printGroup([cell for dragon in dragons for group in dragon for cell in group])
     for index,dragon in enumerate(dragons):
         combinations = []
         if len(dragon) == 1:
@@ -649,7 +650,6 @@ def BruteDragons():
             #  1 = marked
             # -1 = max for the group reached
             
-            printGroup([cell for dragon in dragons for group in dragon for cell in group])
             
             for group in dragon:
                 newCombinations = []
@@ -681,7 +681,7 @@ def BruteDragons():
                 combinations = newCombinations
             
             # Computing global stats
-            dragonMinApples[index] = len(combination)
+            dragonMinApples[index] = len(cells)
             dragonMaxApples[index] = 0
             xor = [0 for _ in range(len(cells))]
             for combination in combinations:
@@ -694,21 +694,42 @@ def BruteDragons():
 
                 if n > dragonMaxApples[index]:
                     dragonMaxApples[index] = n
-                    dragonMaxCells = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
+                    dragonMaxCells[index]  = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
                 elif n == 0:
-                    dragonMaxCells = []
+                    dragonMaxCells[index]  = []
                     # There is no unique solution
                     
                 if n < dragonMinApples[index]:
                     dragonMinApples[index] = n
-                    dragonMinCells = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
+                    dragonMinCells[index] = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
                 elif n == 0:
-                    dragonMaxCells = []
+                    dragonMaxCells[index]  = []
                     # There is no unique solution
                     
                     
-                # Dragon methods
-                
+            # Dragon method : 
+            toMark = []
+            toCut = []
+            for i in range(len(cells)):
+                if xor[i] == len(combinations):
+                    toMark.append(cells[i])
+                elif xor[i] == 0:
+                    toCut.append(cells[i])
+                    
+            if toCut != [] or toMark !=[]:
+                if verbose or True:
+                    printGroup([cell for dragon in dragons for group in dragon for cell in group])
+                    print(f"BRUTE DRAGONS")
+                    print(f"  Every combination has been tested in the dragon {positions([c for group in dragon for c in group])}")
+                    print(f"  In each of the {len(combinations)} possible combinations,")
+                    if toCut!=[]:
+                        print(f"> there is no apple tree at {positions(toCut)}")
+                    if toMark!=[]:
+                        print(f"> there is an apple tree at {positions(toMark)}")
+                BruteDragonsTechnique += 1
+                for c in toCut:  cutTree(c)
+                for c in toMark: markTree(c)
+                return
                 
         minApples += dragonMinApples[index]
         maxApples += dragonMaxApples[index]
@@ -789,4 +810,4 @@ def collectApples(s=0):
 
 verbose = False
 emoji = True
-collectApples(2599)
+collectApples(6220)
