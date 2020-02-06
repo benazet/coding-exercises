@@ -625,12 +625,14 @@ def BruteDragons():
     maxApples = 0
     minCells = []
     maxCells = []
-    dragonMinApples = []
-    dragonMaxApples = []
-    dragonMinCells  = []
-    dragonMaxCells  = []
+    dragonMinApples = [0 for _ in range(len(dragons))]
+    dragonMaxApples = [0 for _ in range(len(dragons))]
+    dragonMinCells  = [[]for _ in range(len(dragons))]
+    dragonMaxCells  = [[]for _ in range(len(dragons))]
     
+    printGroup([cell for dragon in dragons for group in dragon for cell in group])
     for index,dragon in enumerate(dragons):
+        combinations = []
         if len(dragon) == 1:
             # no unique solution, but unique number of apple trees
             dragonMaxApples[index] = applesInGroup[groups.index(dragon[0])]
@@ -642,7 +644,7 @@ def BruteDragons():
             
             cells = sorted(set([cell for group in dragon for cell in group]))
             
-            combinations =[[0 for _ in range(len(cells))]]
+            combinations.append([0 for _ in range(len(cells))])
             #  0 = unused
             #  1 = marked
             # -1 = max for the group reached
@@ -678,39 +680,42 @@ def BruteDragons():
                 # once all groups have been tested, the combination is complete
                 combinations = newCombinations
             
-        # Computing global stats
-        
-        dragonMinApples[index] = len(combinations)
-        dragonMaxApples[index] = 0
-        xor = [0 for _ in range(len(cells))]
-        for combination in combinations:
-            n = 0
-            for group in dragon:
-                for cell,x in zip(combination,xor):
+            # Computing global stats
+            dragonMinApples[index] = len(combination)
+            dragonMaxApples[index] = 0
+            xor = [0 for _ in range(len(cells))]
+            for combination in combinations:
+                n = 0
+                
+                for i,cell in enumerate(combination):
                     if cell == 1:
                         n +=1
-                        x +=1
+                        xor[i] +=1
 
-            if n > dragonMaxApples[index]:
-                dragonMaxApples[index] = n
-                dragonMaxCells = [c for c in cells if combinations(cells.index(c)) == 1]
-            elif n == 0:
-                dragonMaxCells = []
-                # There is no unique solution
+                if n > dragonMaxApples[index]:
+                    dragonMaxApples[index] = n
+                    dragonMaxCells = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
+                elif n == 0:
+                    dragonMaxCells = []
+                    # There is no unique solution
+                    
+                if n < dragonMinApples[index]:
+                    dragonMinApples[index] = n
+                    dragonMinCells = [c for group in dragon for c in group if combination[cells.index(c)] == 1]
+                elif n == 0:
+                    dragonMaxCells = []
+                    # There is no unique solution
+                    
+                    
+                # Dragon methods
                 
-            if n < dragonMinApples[index]:
-                dragonMinApples[index] = n
-                dragonMinCells = [c for c in cells if combinations(cells.index(c)) == 1]
-            elif n == 0:
-                dragonMaxCells = []
-                # There is no unique solution
-              
+                
         minApples += dragonMinApples[index]
-        maxapples += dragonMaxApples[index]
+        maxApples += dragonMaxApples[index]
         minCells += dragonMinCells[index]
         maxCells += dragonMaxCells[index]    
         
-        # Dragon methods
+       
         
         
     
@@ -784,4 +789,4 @@ def collectApples(s=0):
 
 verbose = False
 emoji = True
-collectApples(4435)
+collectApples(2599)
