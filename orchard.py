@@ -532,9 +532,9 @@ def Dragons():
                 index = 0
                 for dragon in dragons:
                     cells = sorted(set([cell for group in dragon for cell in group]))
-                    print(f"   - minimum {minAppleTrees[index]} in group {' '.join(position(cell) for cell in cells)}")
+                    print(f"   - minimum {minAppleTrees[index]} in group {positions(cells)}")
                     index +=1
-                print(f"> Cutting off all other remaining trees : {' '.join(position(cell) for cell in cutTrees)}")
+                print(f"> Cutting off all other remaining trees : {positions(cutTrees)}")
                 print()
             
             for cell in cutTrees:
@@ -600,12 +600,12 @@ def Dragons():
                 index = 0
                 for dragon in dragons:
                     cells = sorted(set([cell for group in dragon for cell in group]))
-                    print(f"   - maximum {maxAppleTrees[index]} in group {' '.join(position(cell) for cell in cells)}")
+                    print(f"   - maximum {maxAppleTrees[index]} in group {positions(cells)}")
                     index +=1
                 if len(others) == 1:
-                    print(f"> Marking the other remaining tree : {' '.join(position(cell) for cell in others)}")
+                    print(f"> Marking the other remaining tree : {positions(others)}")
                 else:
-                    print(f"> Marking the {len(others)} other remaining trees : {' '.join(position(cell) for cell in others)}")
+                    print(f"> Marking the {len(others)} other remaining trees : {positions(others)}")
                 print()
             
             for cell in others:
@@ -631,6 +631,8 @@ def BruteDragons():
     dragonMaxApples = [0 for _ in range(len(dragons))]
     dragonMinCells  = [[]for _ in range(len(dragons))]
     dragonMaxCells  = [[]for _ in range(len(dragons))]
+    
+    nCombinations = [0 for _ in range(len(dragons))]
     
     for index,dragon in enumerate(dragons):
         combinations = []
@@ -717,9 +719,9 @@ def BruteDragons():
                     toCut.append(cells[i])
                     
             if toCut != [] or toMark !=[]:
-                if verbose or True:
+                if verbose:
                     printGroup([cell for dragon in dragons for group in dragon for cell in group])
-                    print(f"BRUTE DRAGONS")
+                    print(f"BRUTE DRAGON")
                     print(f"  Every combination has been tested in the dragon {positions([c for group in dragon for c in group])}")
                     print(f"  In each of the {len(combinations)} possible combinations,")
                     if toCut!=[]:
@@ -736,12 +738,71 @@ def BruteDragons():
         minCells += dragonMinCells[index]
         maxCells += dragonMaxCells[index]    
         
-       
-        
-        
+        nCombinations[index] = len(combinations)
     
-    # Global methods        
+    # Global methods   
+    others = []  
+    for r in range(height):
+        for c in range(width):
+            cell = (r,c)
+            if not clear(cell) and not flag(cell) and not inDragon[r][c] :
+                others.append(cell)
+   
+    global number
+    global flags
+    if number - flags - minApples == 0:
+        if len(others)>0 :
+            if verbose :
+                print()
+                printGroup([c for dragon in dragons for group in dragon for c in group])
+                print(f"LUMBERJACK BRUTE DRAGONS")
+                print(f"  Every combination has been tested in the following dragons :")
+                for index,dragon in enumerate(dragons):
+                    cells = sorted(set([cell for group in dragon for cell in group]))
+                    m = dragonMinApples[index]
+                    M = dragonMaxApples[index]
+                    n = nCombinations[index]
+                    if m == M:
+                        print(f"  - Exactly   {M:<2} apples in the {n} combinations for dragon {positions(cells)}")
+                    else:
+                        print(f"  - {m:<2} to {M:<2} apples in the {n} combinations for dragon {positions(cells)}")
+                print(f"  There are {number - flags} remaining apple trees")
+                print(f"  And minimun {minApples} in the dragons")
+                print(f"> Cuting off all the other trees")
+                print()
+            
+            for cell in others:
+                cutTree(cell)
+            BruteDragonsTechnique += 1
+            return 
+        
+    if number - flags - maxApples == len(others):
+        if len(others)>0 :
+            if verbose :
+                print()
+                printGroup([c for dragon in dragons for group in dragon for c in group])
+                print(f"LUMBERJACK BRUTE DRAGONS")
+                print(f"  Every combination has been tested in the following dragons :")
+                for index,dragon in enumerate(dragons):
+                    cells = sorted(set([cell for group in dragon for cell in group]))
+                    m = dragonMinApples[index]
+                    M = dragonMaxApples[index]
+                    n = nCombinations[index]
+                    if m == M:
+                        print(f"  - Exactly   {M:<2} apples in the {n} combinations for dragon {positions(cells)}")
+                    else:
+                        print(f"  - {m:<2} to {M:<2} apples in the {n} combinations for dragon {positions(cells)}")
+                print(f"  There are maximum {maxApples} in the dragons and {number - flags} remaining apple trees")
+                print(f"  So there is {number - flags - maxApples} remaining apple trees in the {}")
+                print(f"> Cuting off all the other trees")
+                print()
+            
+            for cell in others:
+                cutTree(cell)
+            BruteDragonsTechnique += 1
+            return 
 
+    
             
             
 
@@ -810,4 +871,4 @@ def collectApples(s=0):
 
 verbose = False
 emoji = True
-collectApples(6220)
+collectApples(2599)
