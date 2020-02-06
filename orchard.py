@@ -620,13 +620,34 @@ def Dragons():
 
 def BruteDragons():
     dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
-    for dragon in dragons:
-        if len(dragon) != 1:
-            cells = sorted(set([cell for group in dragon for cell in group]))
-            combinations =[[0 for _ in range(len(cells))]]
-            # 0 unused, 1 = marked, -1 max for the group reached
+    
+    minApples = 0
+    maxApples = 0
+    minCells = []
+    maxCells = []
+    dragonMinApples = []
+    dragonMaxApples = []
+    dragonMinCells  = []
+    dragonMaxCells  = []
+    
+    for index,dragon in enumerate(dragons):
+        if len(dragon) == 1:
+            # no unique solution, but unique number of apple trees
+            dragonMaxApples[index] = applesInGroup[groups.index(dragon[0])]
+            dragonMinApples[index] = applesInGroup[groups.index(dragon[0])]
+            dragonMaxCells[index] = []
+            dragonMinCells[index] = []
+        else:
+            # here comes the brute force
             
-            #printGroup([cell for dragon in dragons for group in dragon for cell in group])
+            cells = sorted(set([cell for group in dragon for cell in group]))
+            
+            combinations =[[0 for _ in range(len(cells))]]
+            #  0 = unused
+            #  1 = marked
+            # -1 = max for the group reached
+            
+            printGroup([cell for dragon in dragons for group in dragon for cell in group])
             
             for group in dragon:
                 newCombinations = []
@@ -641,6 +662,7 @@ def BruteDragons():
                     for iter in [p for p in itertools.product((True, False),repeat=len(group)) if sum(p) == a]:
                         newCombination = combination[:] #shallow copy
                         count = 0
+                        # Apply the combination, if it fits
                         for cell,bool in zip(group,iter):
                             if newCombination[cells.index(cell)] == 0:
                                 if bool :
@@ -649,12 +671,50 @@ def BruteDragons():
                                 else:
                                     newCombination[cells.index(cell)] = -1
                         
+                        # If it fits, append the existing combination
                         if count == a:
                             newCombinations.append(newCombination)
                 
+                # once all groups have been tested, the combination is complete
                 combinations = newCombinations
             
-            print()
+        # Computing global stats
+        
+        dragonMinApples[index] = len(combinations)
+        dragonMaxApples[index] = 0
+        xor = [0 for _ in range(len(cells))]
+        for combination in combinations:
+            n = 0
+            for group in dragon:
+                for cell,x in zip(combination,xor):
+                    if cell == 1:
+                        n +=1
+                        x +=1
+
+            if n > dragonMaxApples[index]:
+                dragonMaxApples[index] = n
+                dragonMaxCells = [c for c in cells if combinations(cells.index(c)) == 1]
+            elif n == 0:
+                dragonMaxCells = []
+                # There is no unique solution
+                
+            if n < dragonMinApples[index]:
+                dragonMinApples[index] = n
+                dragonMinCells = [c for c in cells if combinations(cells.index(c)) == 1]
+            elif n == 0:
+                dragonMaxCells = []
+                # There is no unique solution
+              
+        minApples += dragonMinApples[index]
+        maxapples += dragonMaxApples[index]
+        minCells += dragonMinCells[index]
+        maxCells += dragonMaxCells[index]    
+        
+        # Dragon methods
+        
+        
+    
+    # Global methods        
 
             
             
@@ -722,6 +782,6 @@ def collectApples(s=0):
     printOrchard()
     
 
-verbose = True
+verbose = False
 emoji = True
 collectApples(4435)
