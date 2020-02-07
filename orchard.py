@@ -69,8 +69,8 @@ def printOrchard(cheat=False):
     global number
     printCells(0, height, 0, width, cheat)
     print(f"   🌲  {width * height - cleared - flags} unchecked trees")
-    print(f"   🍎  {number - flags} apple trees")
-    print(f"   🍏  {flags} flags")
+    print(f"   🍎  {number - flags} remaining apple trees")
+    print(f"   🍏  {flags} marked apple trees")
     print()
     print(f"   seed = {seed}")
     print()
@@ -837,17 +837,20 @@ def BruteDragons():
                             for cell in group
                         ]
                     )
-                    print(f"BRUTE DRAGONS")
+                    print(f"BRUTE DRAGONS - STATIC TREES")
                     print(
-                        f"  Every combination has been tested in the dragon {positions([c for group in dragon for c in group])}"
+                        f"  Every solution has been tested for the group {positions([c for group in dragon for c in group])}"
                     )
-                    print(
-                        f"  In each of the {len(combinations)} possible combinations,"
-                    )
-                    if toCut != []:
-                        print(f"> there is no apple tree at {positions(toCut)}")
+                    print(f"  In each of the {len(combinations)} solutions", end="")
                     if toMark != []:
-                        print(f"> there is an apple tree at {positions(toMark)}")
+                        print(f", {positions(toMark)} is an apple tree", end="")
+                    if toCut != []:
+                        print(f", {positions(toCut)} is empty", end="")
+                    print()
+                    if toMark != []:
+                        print(f"> Marking {positions(toMark)}")
+                    if toCut != []:
+                        print(f"> Cutting off {positions(toCut)}")
                 BruteDragonsTechnique += 1
                 for c in toCut:
                     cutTree(c)
@@ -900,15 +903,22 @@ def BruteDragons():
                     dragonCells = sorted(
                         set([cell for group in dragon for cell in group])
                     )
-                    print(f"BRUTE DRAGONS")
+                    print(f"BRUTE DRAGONS - ALL ACOUNTED FOR")
+                    print(f"  {number - flags} apple trees remaining in the orchard")
                     print(
-                        f"  Every combination has been tested in the remaining cells, they contain between {minApples} and {maxApples} apple trees"
+                        f"  Every solution has been tested in the remaining cells, they contain between {minApples} and {maxApples} apple trees."
                     )
-                    print(f"  There are {number - flags} remaining apple trees")
-                    print(
-                        f"  Only one dragon has a variable count of apples : {positions(dragonCells)}"
-                    )
-                    print(f"   and it has only one combination for {goal} apples")
+                    if len(dragons) > 1:
+                        print(
+                            f"  All groups but one have a constant count, that add up to {number - flags - goal}"
+                        )
+                        print(
+                            f"  Group {positions(dragonCells)} has only one solution for {goal} apples : {positions(toMark)}"
+                        )
+                    else:
+                        print(
+                            f"  There is only one solution for {goal} apples : {positions(toMark)}"
+                        )
                     if toMark != []:
                         print(f"> Marking {positions(toMark)}")
                     if toCut != []:
@@ -935,8 +945,11 @@ def BruteDragons():
             if verbose or True:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"LUMBERJACK BRUTE DRAGONS")
-                print(f"  Every combination has been tested in the following dragons :")
+                print(f"BRUTE DRAGONS - LUMBERJACK")
+                print(f"  {number - flags} apple trees remaining in the orchard")
+                print(
+                    f"  Every solution has been tested in the following groups, they contain minimum total of {minApples} apple trees :"
+                )
                 for index, dragon in enumerate(dragons):
                     dragonCells = sorted(
                         set([cell for group in dragon for cell in group])
@@ -946,19 +959,18 @@ def BruteDragons():
                     n = nCombinations[index]
                     if m == M:
                         print(
-                            f"  - Exactly   {M:<2} apples in the {n} combinations for dragon {positions(dragonCells)}"
+                            f"  - Exactly   {M:<2} apples in the {n} solutions for {positions(dragonCells)}"
                         )
                     else:
                         print(
-                            f"  - {m:<2} to {M:<2} apples in the {n} combinations for dragon {positions(dragonCells)}"
+                            f"  - {m:<2} to {M:<2} apples in the {n} solutions for {positions(dragonCells)}"
                         )
-                print(f"  There are {number - flags} remaining apple trees")
-                print(f"  And minimun {minApples} in the dragons")
+                print(f"> Cuting off all other remaining trees {positions(otherCells)}")
+                print(f"  This minimum is obtained with a unique solution :")
                 if toMark != []:
                     print(f"> Marking {positions(toMark)}")
                 if toCut != []:
                     print(f"> Cutting off {positions(toCut)}")
-                print(f"> Cuting off all the other trees {positions(otherCells)}")
                 print()
 
             for c in toCut:
@@ -982,8 +994,11 @@ def BruteDragons():
             if verbose or True:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"LUMBERJACK BRUTE DRAGONS")
-                print(f"  Every combination has been tested in the following dragons :")
+                print(f"BRUTE DRAGONS - FORRESTER")
+                print(f"  {number - flags} apple trees remaining in the orchard")
+                print(
+                    f"  Every solution has been tested in the following groups, they contain a maximum of {maxApples} apple trees :"
+                )
                 for index, dragon in enumerate(dragons):
                     dragonCells = sorted(
                         set([cell for group in dragon for cell in group])
@@ -993,23 +1008,20 @@ def BruteDragons():
                     n = nCombinations[index]
                     if m == M:
                         print(
-                            f"  - Exactly   {M:<2} apples in the {n} combinations for dragon {positions(dragonCells)}"
+                            f"  - Exactly   {M:<2} apples in the {n} solutions for dragon {positions(dragonCells)}"
                         )
                     else:
                         print(
-                            f"  - {m:<2} to {M:<2} apples in the {n} combinations for dragon {positions(dragonCells)}"
+                            f"  - {m:<2} to {M:<2} apples in the {n} solutions for dragon {positions(dragonCells)}"
                         )
-                print(
-                    f"  There are maximum {maxApples} in the dragons and {number - flags} remaining apple trees"
-                )
-                print(
-                    f"  So there is {number - flags - maxApples} remaining apple trees in the {others} other trees"
-                )
+                print(f"  There are {others} other trees out of these groups")
+                print(f"> Marking all other remaining trees {positions(otherCells)}")
+
+                print(f"  This maximum is obtained with a unique solution :")
                 if toMark != []:
                     print(f"> Marking {positions(toMark)}")
                 if toCut != []:
                     print(f"> Cutting off {positions(toCut)}")
-                print(f"> Marking all the other trees {positions(otherCells)}")
                 print()
 
             for c in toCut:
@@ -1096,6 +1108,6 @@ def collectApples(s=0):
     printOrchard()
 
 
-verbose = False
+verbose = True
 emoji = True
-collectApples(2599)
+collectApples(6220)
