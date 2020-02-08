@@ -25,7 +25,10 @@ ForresterTechnique = 0
 TwinsTechnique = 0
 TripletsTechnique = 0
 DragonsTechnique = 0
+StaticTreesTechnique = 0
+AllAccountedForTechnique = 0
 BruteDragonsTechnique = 0
+GettingTrickyTechnique = 0
 
 
 def createOrchard(h, w, n=-1, r=-1, c=-1):
@@ -75,13 +78,16 @@ def printOrchard(cheat=False):
     print(f"   seed = {seed}")
     print()
     print(f"Techniques used :")
-    print(f"   {'Clearing':<15}{ClearingTechnique:>3}")
-    print(f"   {'Lumberjack':<15}{LumberjackTechnique:>3}")
-    print(f"   {'Forrester':<15}{ForresterTechnique:>3}")
-    print(f"   {'Twins':<15}{TwinsTechnique:>3}")
-    print(f"   {'Triplets':<15}{TripletsTechnique:>3}")
-    print(f"   {'Dragons':<15}{DragonsTechnique:>3}")
-    print(f"   {'Brute Dragons':<15}{BruteDragonsTechnique:>3}")
+    print(f"   {'Clearing':<20}{ClearingTechnique:>3}")
+    print(f"   {'Lumberjack':<20}{LumberjackTechnique:>3}")
+    print(f"   {'Forrester':<20}{ForresterTechnique:>3}")
+    print(f"   {'Twins':<20}{TwinsTechnique:>3}")
+    print(f"   {'Triplets':<20}{TripletsTechnique:>3}")
+    print(f"   {'Dragons':<20}{DragonsTechnique:>3}")
+    print(f"   {'Static trees':<20}{StaticTreesTechnique:>3}")
+    print(f"   {'All accounted for':<20}{AllAccountedForTechnique:>3}")
+    print(f"   {'Brute dragons':<20}{BruteDragonsTechnique:>3}")
+    print(f"   {'Getting tricky':<20}{GettingTrickyTechnique:>3}")
     print()
 
 
@@ -503,15 +509,7 @@ def Triplets(A):
 
 def getDragons():
     # We call 'dragons' the groups of intersecting group of uncut trees adjacent to a cleared cell
-    # A. We determinate the dragons
-    # B. We count min number of apple trees in each dragon, and add them
-    #    If this sum equals the number of remaining apple trees, then
-    #    every cell that is not in a dragon can be cleared
-    # C. We count the max number of apple trees in each dragon, and add them
-    #    If this number + the number of other remaining trees equals the
-    #    number of remaining apple trees, then all other remaining trees are apple trees
-
-    # The term 'dragon' comes from the game of Go
+    # The term comes from the game of Go
 
     groups = []
     inDragon = [[False for _ in range(width)] for _ in range(height)]
@@ -540,11 +538,13 @@ def getDragons():
     # Find dragons : Group groups if they intersect.
     dragonNumber = [i for i in range(len(groups))]
     for i in range(len(groups)):
-        for j in range(len(groups)):
+        for j in range(i, len(groups)):
             if i != j:
                 if set(groups[i]) & set(groups[j]):
                     if dragonNumber[j] != j:
-                        dragonNumber[i] = dragonNumber[j]
+                        for k in range(len(groups)):
+                            if dragonNumber[k] == dragonNumber[j]:
+                                dragonNumber[k] = dragonNumber[i]
                     else:
                         dragonNumber[j] = dragonNumber[i]
     dragons = []
@@ -727,7 +727,11 @@ def BruteDragons():
     # - if only one dragon has a variable number of possible apple and there are no other trees
     # - the now classic forrester and lumberkack techniques with the min and max values
 
+    global StaticTreesTechnique
+    global AllAccountedForTechnique
     global BruteDragonsTechnique
+    global GettingTrickyTechnique
+
     dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
 
     minApples = 0
@@ -852,7 +856,7 @@ def BruteDragons():
                         set([cell for group in dragon for cell in group])
                     )
                     printGroup(dragonCells)
-                    print(f"BRUTE DRAGONS - STATIC TREES")
+                    print(f"STATIC TREES")
                     print(
                         f"  Every solution has been tested for the group {positions(dragonCells)}"
                     )
@@ -867,7 +871,7 @@ def BruteDragons():
                     if toCut != []:
                         print(f"> Cutting off {positions(toCut)}")
                     print()
-                BruteDragonsTechnique += 1
+                StaticTreesTechnique += 1
                 for c in toCut:
                     cutTree(c)
                 for c in toMark:
@@ -921,7 +925,7 @@ def BruteDragons():
                         dragonCells = sorted(
                             set([cell for group in dragon for cell in group])
                         )
-                        print(f"BRUTE DRAGONS - ALL ACOUNTED FOR")
+                        print(f"ALL ACOUNTED FOR")
                         print(
                             f"  {number - flags} apple trees remaining in the orchard"
                         )
@@ -949,7 +953,7 @@ def BruteDragons():
                         cutTree(c)
                     for c in toMark:
                         markTree(c)
-                    BruteDragonsTechnique += 1
+                    AllAccountedForTechnique += 1
                     return
                 else:
                     xor = [0 for _ in range(len(cells))]
@@ -967,18 +971,12 @@ def BruteDragons():
 
                     if toCut != [] or toMark != []:
                         if verbose:
-                            printGroup(
-                                [
-                                    cell
-                                    for dragon in dragons
-                                    for group in dragon
-                                    for cell in group
-                                ]
-                            )
+
                             dragonCells = sorted(
                                 set([cell for group in dragon for cell in group])
                             )
-                            print(f"BRUTE DRAGONS - IT'S GETTING TRICKY")
+                            printGroup(dragonCells)
+                            print(f"IT'S GETTING TRICKY")
                             print(
                                 f"  {number - flags} apple trees remaining in the orchard"
                             )
@@ -1006,7 +1004,7 @@ def BruteDragons():
                             if toCut != []:
                                 print(f"> Cutting off {positions(toCut)}")
                             print()
-                        BruteDragonsTechnique += 1
+                        GettingTrickyTechnique += 1
                         for c in toCut:
                             cutTree(c)
                         for c in toMark:
@@ -1026,7 +1024,7 @@ def BruteDragons():
             if verbose or True:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"BRUTE DRAGONS - LUMBERJACK")
+                print(f"BRUTE LUMBERJACK DRAGONS")
                 print(f"  {number - flags} apple trees remaining in the orchard")
                 print(
                     f"  Every solution has been tested in the following groups, they contain minimum total of {minApples} apple trees :"
@@ -1077,7 +1075,7 @@ def BruteDragons():
             if verbose or True:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"BRUTE DRAGONS - FORRESTER")
+                print(f"BRUTE FORRESTER DRAGONS")
                 print(f"  {number - flags} apple trees remaining in the orchard")
                 print(
                     f"  Every solution has been tested in the following groups, they contain a maximum of {maxApples} apple trees :"
@@ -1193,4 +1191,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples()
+collectApples(9655)
