@@ -372,6 +372,7 @@ def Twins(A):
                 minB = minApples(nAiB, B)
                 maxB, absoluteMaxB = maxApples(nAiB, B)
                 xA = [c for c in unA if not c in nAiB]
+                xB = [c for c in unB if not c in unA]
                 if len(xA) > 0:
                     if a - f - minB == 0:
                         TwinsTechnique += 1
@@ -408,8 +409,7 @@ def Twins(A):
                                 f"  {position(A)} has {a-f-maxB} remaining apple trees in {len(xA)} trees {' '.join(position(c) for c in xA)}"
                             )
                             print(f"> Marking {' '.join(position(c) for c in xA)}")
-                            if absoluteMaxB:
-                                xB = [c for c in unB if not c in unA]
+                            if absoluteMaxB and len(xB) > 0:
                                 print(f"> Cutting off {positions(xB)}")
                             print()
                         for c in xA:
@@ -443,13 +443,13 @@ def Triplets(A):
                     nBiC = set(unB) & set(unC)
                     if nBiC and not nBiC & nAiB:
                         xB = [c for c in unB if not c in nAiB and not c in nBiC]
-                        if len(xB) > 0:
+                        xA = [c for c in unA if not c in unB]
+                        xC = [c for c in unC if not c in unB]
+                        if len(xB) > 0 or len(xA) > 0 or len(xC) > 0:
                             a = apples(B)
                             f = countFlag(nB)
                             minA = minApples(nAiB, A)
                             minC = minApples(nBiC, C)
-                            xA = [c for c in unA if not c in unB]
-                            xC = [c for c in unC if not c in unB]
                             if a - f - minA - minC == 0:
                                 TripletsTechnique += 1
                                 if verbose:
@@ -459,14 +459,15 @@ def Triplets(A):
                                         f"  {position(B)} shares {len(nAiB)} neighbours with {position(A)} and {len(nBiC)} with {position(C)}"
                                     )
                                     print(
-                                        f"   - {position(A)} has minimum {minA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}"
+                                        f"   - {position(A)} has {minA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}"
                                     )
                                     print(
-                                        f"   - {position(C)} has minimum {minC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}"
+                                        f"   - {position(C)} has {minC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}"
                                     )
-                                    print(
-                                        f"> Cutting off {' '.join(position(c) for c in xB)}"
-                                    )
+                                    if len(xB) > 0:
+                                        print(
+                                            f"> Cutting off {' '.join(position(c) for c in xB)}"
+                                        )
                                     if len(xA) > 0:
                                         print(f"> Marking {positions(xA)}")
                                     if len(xC) > 0:
@@ -491,14 +492,15 @@ def Triplets(A):
                                         f"  {position(B)} shares neighbours with {position(A)} and {position(C)}"
                                     )
                                     print(
-                                        f"   - {position(A)} has maximum {maxA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}"
+                                        f"   - {position(A)} has {maxA} apple trees in the shared neighbours {' '.join(position(c) for c in nAiB)}"
                                     )
                                     print(
-                                        f"   - {position(C)} has maximum {maxC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}"
+                                        f"   - {position(C)} has {maxC} apple trees in the shared neighbours {' '.join(position(c) for c in nBiC)}"
                                     )
-                                    print(
-                                        f"> Marking {' '.join(position(c) for c in xB)}"
-                                    )
+                                    if len(xB) > 0:
+                                        print(
+                                            f"> Marking {' '.join(position(c) for c in xB)}"
+                                        )
                                     if absoluteMaxA and len(xA) > 0:
                                         print(f"> Cutting off {positions(xA)}")
                                     if absoluteMaxC and len(xC) > 0:
@@ -919,18 +921,15 @@ def BruteDragons():
                 combinations = []
                 for combination in combVariable:
                     n = 0
-                    toMark = []
-                    toCut = []
-                    for i, cell in enumerate(combination):
-                        if cell == 1:
+                    for b in combination:
+                        if b == 1:
                             n += 1
-                            toMark.append(cells[i])
-                        else:
-                            toCut.append(cells[i])
                     if n == goal:
                         combinations.append(combination)
 
                 if len(combinations) == 1:
+                    toMark = [cell for cell, b in zip(cells, combinations[0]) if b == 1]
+                    toCut = [cell for cell, b in zip(cells, combinations[0]) if b != 1]
                     if verbose or True:
                         print()
                         printGroup(
@@ -1210,4 +1209,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples(8712)
+collectApples(774)
