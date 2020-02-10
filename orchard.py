@@ -592,6 +592,7 @@ def BruteForce():
     dragonMaxCells = [[] for _ in range(len(dragons))]
 
     nCombinations = [0 for _ in range(len(dragons))]
+    Variable = [False for _ in range(len(dragons))]
     nVariable = 0
     iVariable = -1
     combVariable = []
@@ -607,6 +608,7 @@ def BruteForce():
             dragonMaxCells[index] = []
             dragonMinCells[index] = []
             nCombinations[index] = len(list(itertools.combinations(range(n), a)))
+            Variable[index] = False
             # i know it is n! / (a! * (n-a)!)
         else:
             # here comes the brute force
@@ -690,6 +692,7 @@ def BruteForce():
                     # There is no unique solution
 
             if dragonMinApples[index] != dragonMaxApples[index]:
+                Variable[index] = True
                 nVariable += 1
                 iVariable = index
                 combVariable = combinations
@@ -859,14 +862,21 @@ def BruteForce():
                         return
 
     else:
+        cells = sorted(
+            set([cell for dragon in dragons for group in dragon for cell in group])
+        )
+
         if trees - flags - minApples == 0:
             toMark = []
             toCut = []
-            for cell in cells:
-                if cell in minCells:
-                    toMark.append(cell)
-                else:
-                    toCut.append(cell)
+            for index, dragon in enumerate(dragons):
+                if not Variable[index]:
+                    for group in dragon:
+                        for cell in group:
+                            if cell in minCells:
+                                toMark.append(cell)
+                            else:
+                                toCut.append(cell)
 
             if verbose:
                 print()
@@ -885,17 +895,22 @@ def BruteForce():
                     n = nCombinations[index]
                     if m == M:
                         print(
-                            f"  - Exactly {M} in the {n} solutions for {positions(dragonCells)}"
+                            f"  - Exactly {M} in the {n} solutions for {positions(dragonCells)}",
+                            end="",
                         )
                     else:
                         print(
-                            f"  - {m} to {M} in the {n} solutions for {positions(dragonCells)}"
+                            f"  - {m} to {M} in the {n} solutions for {positions(dragonCells)}",
+                            end="",
                         )
+                    if not Variable[index]:
+                        print(f", and only one solution for {m}")
+                    else:
+                        print()
                 print(
                     f"> Cuting off all other remaining trees : {positions(otherCells)}"
                 )
                 if minCells != []:
-                    print(f"  There is only one solution to get this minimum :")
                     if toMark != []:
                         print(f"> Marking {positions(toMark)}")
                     if toCut != []:
@@ -916,11 +931,14 @@ def BruteForce():
         if trees - flags - maxApples == others:
             toMark = []
             toCut = []
-            for cell in cells:
-                if cell in maxCells:
-                    toMark.append(cell)
-                else:
-                    toCut.append(cell)
+            for index, dragon in enumerate(dragons):
+                if not Variable[index]:
+                    for group in dragon:
+                        for cell in group:
+                            if cell in maxCells:
+                                toMark.append(cell)
+                            else:
+                                toCut.append(cell)
 
             if verbose:
                 print()
@@ -939,17 +957,22 @@ def BruteForce():
                     n = nCombinations[index]
                     if m == M:
                         print(
-                            f"  - Exactly {M} in the {n} solutions for {positions(dragonCells)}"
+                            f"  - Exactly {M} in the {n} solutions for {positions(dragonCells)}",
+                            end="",
                         )
                     else:
                         print(
-                            f"  - {m} to {M} in the {n} solutions for {positions(dragonCells)}"
+                            f"  - {m} to {M} in the {n} solutions for {positions(dragonCells)}",
+                            end="",
                         )
+                    if not Variable[index]:
+                        print(f", and only one solution for {M}")
+                    else:
+                        print()
                 print(f"  There are {others} other trees out of these groups")
                 print(f"> Marking all other remaining trees {positions(otherCells)}")
 
                 if maxCells != []:
-                    print(f"  There is only one solution to get this maximum :")
                     if toMark != []:
                         print(f"> Marking {positions(toMark)}")
                     if toCut != []:
@@ -997,12 +1020,12 @@ def BruteForce():
         if others > 0:
             if minApples < maxApples:
                 print(
-                    f"  And {max(0,trees - flags - maxApples)} to {min(others,trees - flags - minApples)} in the {others} remaining trees",
+                    f" And {max(0,trees - flags - maxApples)} to {min(others,trees - flags - minApples)} in the {others} remaining trees",
                     end="",
                 )
             else:
                 print(
-                    f"  And {max(0,trees - flags - maxApples)} in the {others} remaining trees",
+                    f" And {max(0,trees - flags - maxApples)} in the {others} remaining trees",
                     end="",
                 )
             if others <= 10:
@@ -1090,4 +1113,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples(7653)
+collectApples()
