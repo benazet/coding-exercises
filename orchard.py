@@ -741,8 +741,9 @@ def Dragons():
 def BruteDragons():
     # Brute Force can give 4 types of answers :
     # - if a cell is the same throughout all the combinations
-    # - if only one dragon has a variable number of possible apple and there are no other trees
-    # - the now classic forrester and lumberkack techniques with the min and max values
+    # - if only one dragon has a variable count of apple trees and there are no other trees
+    # - static cells amongst the solutions of the only variable solutions
+    # - the now classic forrester and lumberkack techniques with the global min and max values
 
     global StaticTreesTechnique
     global AllAccountedForTechnique
@@ -1225,9 +1226,9 @@ def collectApples(s=0):
         Triplets(cell)
         if len(stack) > 0 or trees == flags:
             continue
-        Dragons()
-        if len(stack) > 0 or trees == flags:
-            continue
+        # Dragons()
+        # if len(stack) > 0 or trees == flags:
+        #    continue
         BruteDragons()
 
         # i discarded the return True -> continue syntax used at first because it doesn't work with the dragons techniques that can change the board without changing the stack
@@ -1259,4 +1260,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples()
+collectApples(605)
