@@ -673,7 +673,7 @@ def BruteForce():
                         for c in group
                         if combination[cells.index(c)] == 1
                     ]
-                else:
+                elif n == dragonMaxApples[index]:
                     dragonMaxCells[index] = []
                     # There is no unique solution
 
@@ -685,7 +685,7 @@ def BruteForce():
                         for c in group
                         if combination[cells.index(c)] == 1
                     ]
-                else:
+                elif n == dragonMinApples[index]:
                     dragonMinCells[index] = []
                     # There is no unique solution
 
@@ -894,19 +894,22 @@ def BruteForce():
                 print(
                     f"> Cuting off all other remaining trees : {positions(otherCells)}"
                 )
-                print(f"  There is only one solution to get this minimum :")
-                if toMark != []:
-                    print(f"> Marking {positions(toMark)}")
-                if toCut != []:
-                    print(f"> Cutting off {positions(toCut)}")
+                if minCells != []:
+                    print(f"  There is only one solution to get this minimum :")
+                    if toMark != []:
+                        print(f"> Marking {positions(toMark)}")
+                    if toCut != []:
+                        print(f"> Cutting off {positions(toCut)}")
                 print()
 
-            for c in toCut:
-                cutTree(c)
-            for c in toMark:
-                markTree(c)
             for cell in otherCells:
                 cutTree(cell)
+
+            if minCells != []:
+                for c in toCut:
+                    cutTree(c)
+                for c in toMark:
+                    markTree(c)
             BruteDragonsTechnique += 1
             return
 
@@ -945,19 +948,22 @@ def BruteForce():
                 print(f"  There are {others} other trees out of these groups")
                 print(f"> Marking all other remaining trees {positions(otherCells)}")
 
-                print(f"  There is only one solution to get this maximum :")
-                if toMark != []:
-                    print(f"> Marking {positions(toMark)}")
-                if toCut != []:
-                    print(f"> Cutting off {positions(toCut)}")
+                if maxCells != []:
+                    print(f"  There is only one solution to get this maximum :")
+                    if toMark != []:
+                        print(f"> Marking {positions(toMark)}")
+                    if toCut != []:
+                        print(f"> Cutting off {positions(toCut)}")
                 print()
 
-            for c in toCut:
-                cutTree(c)
-            for c in toMark:
-                markTree(c)
             for cell in otherCells:
                 markTree(cell)
+
+            if maxCells != []:
+                for c in toCut:
+                    cutTree(c)
+                for c in toMark:
+                    markTree(c)
             BruteDragonsTechnique += 1
             return
 
@@ -1084,4 +1090,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples(774)
+collectApples(7653)
