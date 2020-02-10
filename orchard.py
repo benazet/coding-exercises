@@ -389,9 +389,13 @@ def Twins(A):
                                 f"  {position(A)} has no remaining apple trees in {' '.join(position(c) for c in xA)}"
                             )
                             print(f"> Cutting off {' '.join(position(c) for c in xA)}")
+                            if len(xB) > 0:
+                                print(f"> Marking {positions(xB)}")
                             print()
                         for c in xA:
                             cutTree(c)
+                        for c in xB:
+                            markTree(c)
                         return
 
                     if a - f - maxB == len(xA):
@@ -1209,4 +1213,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples(774)
+collectApples()
