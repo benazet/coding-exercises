@@ -24,7 +24,6 @@ LumberjackTechnique = 0
 ForresterTechnique = 0
 TwinsTechnique = 0
 TripletsTechnique = 0
-DragonsTechnique = 0
 StaticTreesTechnique = 0
 AllAccountedForTechnique = 0
 BruteDragonsTechnique = 0
@@ -79,7 +78,7 @@ def printOrchard(cheat=False):
     print()
     print(f"Techniques used :")
     print(f"   {'Clearing':<20}{ClearingTechnique:>3}", end="")
-    print(f"   {'Dragons':<20}{DragonsTechnique:>3}")
+    print(f"   {'Dragons':<20}{BruteDragonsTechnique:>3}")
     print(f"   {'Lumberjack':<20}{LumberjackTechnique:>3}", end="")
     print(f"   {'Static trees':<20}{StaticTreesTechnique:>3}")
     print(f"   {'Forrester':<20}{ForresterTechnique:>3}", end="")
@@ -87,7 +86,6 @@ def printOrchard(cheat=False):
     print(f"   {'Twins':<20}{TwinsTechnique:>3}", end="")
     print(f"   {'All accounted for':<20}{AllAccountedForTechnique:>3}")
     print(f"   {'Triplets':<20}{TripletsTechnique:>3}", end="")
-    print(f"   {'Brute dragons':<20}{BruteDragonsTechnique:>3}")
     print()
 
 
@@ -523,13 +521,12 @@ def Triplets(A):
                                 return
 
 
-def getDragons():
+def BruteForce():
     # We call 'dragons' the groups of intersecting group of uncut trees adjacent to a cleared cell
     # The term comes from the game of Go
 
     groups = []
     inDragon = [[False for _ in range(width)] for _ in range(height)]
-    nGroups = [[0 for _ in range(width)] for _ in range(height)]
     applesInGroup = []
     # A DETERMINE THE DRAGONS
     # Collect groups
@@ -543,7 +540,6 @@ def getDragons():
                 applesInGroup.append(apples(cell) - f)
                 for i, j in group:
                     inDragon[i][j] = True
-                    nGroups[i][j] += 1
             else:
                 # If that group already exists, as the stack is empty, all cells pointing to that group should have the same remaining number of apples
                 # if applesInGroup[groups.index(group)] != apples((r,c)) - f:
@@ -571,174 +567,7 @@ def getDragons():
                 dragon.append(groups[j])
         if len(dragon) > 0:
             dragons.append(dragon)
-    return dragons, groups, applesInGroup, nGroups, inDragon
 
-
-def Dragons():
-    dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
-
-    if dragons == []:
-        return
-
-    hypFlag = [[False for _ in range(width)] for _ in range(height)]
-    hypClear = [[False for _ in range(width)] for _ in range(height)]
-
-    minAppleTrees = [0 for _ in range(len(dragons))]
-    totalMin = 0
-    index = 0
-    for dragon in dragons:
-        if len(dragon) == 1:
-            minAppleTrees[index] = applesInGroup[groups.index(dragon[0])]
-        else:
-            for group in dragon:
-                n = applesInGroup[groups.index(group)]
-                for r, c in group:
-                    if hypFlag[r][c]:
-                        n -= 1
-
-                while n > 0:
-                    max = 0
-                    for r, c in group:
-                        if (
-                            nGroups[r][c] > max
-                            and not hypFlag[r][c]
-                            and not hypClear[r][c]
-                        ):
-                            max = nGroups[r][c]
-                            bestr, bestc = r, c
-                    hypFlag[bestr][bestc] = True
-                    minAppleTrees[index] += 1
-                    n -= 1
-
-                for r, c in group:
-                    if not hypFlag[r][c] and not hypClear[r][c]:
-                        hypClear[r][c] = True
-
-        totalMin += minAppleTrees[index]
-        index += 1
-
-    # Compare
-    global trees
-    global flags
-    if totalMin == trees - flags:
-        # Clear all cells not in a dragon
-        cutTrees = []
-        border = []
-        for r in range(height):
-            for c in range(width):
-                cell = (r, c)
-                if not clear(cell) and not flag(cell):
-                    if not inDragon[r][c]:
-                        cutTrees.append(cell)
-                    else:
-                        border.append(cell)
-
-        if len(cutTrees) > 0:
-            if verbose:
-                print()
-                printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"LUMBERJACK DRAGONS")
-                print(
-                    f"  {trees - flags} apple trees remaining in the orchard, and minimum {totalMin} in the following groups :"
-                )
-                index = 0
-                for dragon in dragons:
-                    cells = sorted(set([cell for group in dragon for cell in group]))
-                    print(
-                        f"   - minimum {minAppleTrees[index]} in group {positions(cells)}"
-                    )
-                    index += 1
-                print(
-                    f"> Cutting off all other remaining trees : {positions(cutTrees)}"
-                )
-                print()
-
-            for cell in cutTrees:
-                cutTree(cell)
-            global DragonsTechnique
-            DragonsTechnique += 1
-            return
-
-    # B COUNT THE MAX NUMBER OF APPLE TREES
-    # To determine the minimum number of apple trees, populate first the cells that intersect the most groups
-
-    hypFlag = [[False for _ in range(width)] for _ in range(height)]
-    hypClear = [[False for _ in range(width)] for _ in range(height)]
-
-    maxAppleTrees = [0 for _ in range(len(dragons))]
-    totalMax = 0
-    index = 0
-    for dragon in dragons:
-        if len(dragon) == 1:
-            maxAppleTrees[index] = applesInGroup[groups.index(dragon[0])]
-        else:
-            for group in dragon:
-                n = applesInGroup[groups.index(group)]
-                for r, c in group:
-                    if hypFlag[r][c]:
-                        n -= 1
-
-                while n > 0:
-                    min = 8
-                    for r, c in group:
-                        if (
-                            nGroups[r][c] < min
-                            and not hypFlag[r][c]
-                            and not hypClear[r][c]
-                        ):
-                            min = nGroups[r][c]
-                            bestr, bestc = r, c
-                    hypFlag[bestr][bestc] = True
-                    maxAppleTrees[index] += 1
-                    n -= 1
-
-                for r, c in group:
-                    if not hypFlag[r][c] and not hypClear[r][c]:
-                        hypClear[r][c] = True
-
-        totalMax += maxAppleTrees[index]
-        index += 1
-
-    # Compare
-    others = []
-    for r in range(height):
-        for c in range(width):
-            cell = (r, c)
-            if not clear(cell) and not flag(cell) and not inDragon[r][c]:
-                others.append(cell)
-
-    if trees - flags - totalMax == len(others):
-        # Flag all cells not in a dragon
-        if len(others) > 0:
-            if verbose:
-                print()
-                printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"FORRESTER DRAGONS")
-                print(
-                    f"  {trees - flags} apple trees remaining in the orchard, and maximum {totalMax} in the following groups :"
-                )
-                index = 0
-                for dragon in dragons:
-                    cells = sorted(set([cell for group in dragon for cell in group]))
-                    print(
-                        f"   - maximum {maxAppleTrees[index]} in group {positions(cells)}"
-                    )
-                    index += 1
-                if len(others) == 1:
-                    print(f"> Marking the other remaining tree : {positions(others)}")
-                else:
-                    print(
-                        f"> Marking the {len(others)} other remaining trees : {positions(others)}"
-                    )
-                print()
-
-            for cell in others:
-                markTree(cell)
-            DragonsTechnique += 1
-            return
-
-
-def BruteDragons():
     # Brute Force can give 4 types of answers :
     # - if a cell is the same throughout all the combinations
     # - if only one dragon has a variable count of apple trees and there are no other trees
@@ -749,8 +578,6 @@ def BruteDragons():
     global AllAccountedForTechnique
     global BruteDragonsTechnique
     global GettingTrickyTechnique
-
-    dragons, groups, applesInGroup, nGroups, inDragon = getDragons()
 
     if dragons == []:
         return
@@ -846,7 +673,7 @@ def BruteDragons():
                         for c in group
                         if combination[cells.index(c)] == 1
                     ]
-                elif n == 0:
+                else:
                     dragonMaxCells[index] = []
                     # There is no unique solution
 
@@ -858,8 +685,8 @@ def BruteDragons():
                         for c in group
                         if combination[cells.index(c)] == 1
                     ]
-                elif n == 0:
-                    dragonMaxCells[index] = []
+                else:
+                    dragonMinCells[index] = []
                     # There is no unique solution
 
             if dragonMinApples[index] != dragonMaxApples[index]:
@@ -1044,7 +871,7 @@ def BruteDragons():
             if verbose:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"BRUTE LUMBERJACK DRAGONS")
+                print(f"LUMBERJACK DRAGONS")
                 print(f"  {trees - flags} apple trees remaining in the orchard")
                 print(
                     f"  Every solution has been tested, they contain minimum total of {minApples} apple trees :"
@@ -1067,7 +894,7 @@ def BruteDragons():
                 print(
                     f"> Cuting off all other remaining trees : {positions(otherCells)}"
                 )
-                print(f"  This minimum is obtained with a unique solution :")
+                print(f"  There is only one solution to get this minimum :")
                 if toMark != []:
                     print(f"> Marking {positions(toMark)}")
                 if toCut != []:
@@ -1095,7 +922,7 @@ def BruteDragons():
             if verbose:
                 print()
                 printGroup([c for dragon in dragons for group in dragon for c in group])
-                print(f"BRUTE FORRESTER DRAGONS")
+                print(f"FORRESTER DRAGONS")
                 print(f"  {trees - flags} apple trees remaining in the orchard")
                 print(
                     f"  Every solution has been tested, they contain a maximum of {maxApples} apple trees :"
@@ -1118,7 +945,7 @@ def BruteDragons():
                 print(f"  There are {others} other trees out of these groups")
                 print(f"> Marking all other remaining trees {positions(otherCells)}")
 
-                print(f"  This maximum is obtained with a unique solution :")
+                print(f"  There is only one solution to get this maximum :")
                 if toMark != []:
                     print(f"> Marking {positions(toMark)}")
                 if toCut != []:
@@ -1226,10 +1053,7 @@ def collectApples(s=0):
         Triplets(cell)
         if len(stack) > 0 or trees == flags:
             continue
-        # Dragons()
-        # if len(stack) > 0 or trees == flags:
-        #    continue
-        BruteDragons()
+        BruteForce()
 
         # i discarded the return True -> continue syntax used at first because it doesn't work with the dragons techniques that can change the board without changing the stack
 
@@ -1260,4 +1084,4 @@ def collectApples(s=0):
 
 verbose = True
 emoji = True
-collectApples(605)
+collectApples(774)
